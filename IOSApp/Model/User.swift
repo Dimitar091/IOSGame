@@ -13,6 +13,7 @@ struct User: Codable {
     var id: String?
     var username: String?
     var avatarImage: String?
+    var deviceToken: String?
     
    static func createUser(id: String, username: String) -> User {
         var user = User()

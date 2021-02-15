@@ -16,6 +16,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        requestPushNotifications()
         title = "Welcome " + (DataStore.shared.localUser?.username ?? "")
         NotificationCenter.default.addObserver(self, selector: #selector(didReciveGameRequest(_:)), name: Notification.Name("DidReviveGameRequestNotification"), object: nil)
         getUsers()
@@ -57,6 +58,11 @@ class HomeViewController: UIViewController {
     
     private func declineRequest(gameRequest: GameRequest) {
         DataStore.shared.deleteGameRequest(gameRequest: gameRequest)
+    }
+    
+    private func requestPushNotifications() {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        appDelegate.requestNotificationsPermission()
     }
     
     func setupTableView() {
