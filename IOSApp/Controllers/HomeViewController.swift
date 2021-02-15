@@ -104,7 +104,7 @@ extension HomeViewController: UserCellDelegate {
             if !exists {
                 DataStore.shared.startGameRequest(userId: userId) { [weak self] (request, error) in
                     if request != nil {
-                        self?.setupLoadingView(me: localUser, opponent: user)
+                        self?.setupLoadingView(me: localUser, opponent: user, requset: request)
                         DataStore.shared.setGameRequestDelitionListener()
                  }
               }
@@ -115,12 +115,12 @@ extension HomeViewController: UserCellDelegate {
 // MARK: LoadingViewHandling
 extension HomeViewController {
     
-    func setupLoadingView(me: User, opponent: User) {
+    func setupLoadingView(me: User, opponent: User, requset: GameRequest?) {
         if loadingView != nil {
             loadingView?.removeFromSuperview()
             loadingView = nil
         }
-        loadingView = LoadingView(me: me, opponent: opponent)
+        loadingView = LoadingView(me: me, opponent: opponent, requset: requset)
         view.addSubview(loadingView!)
         loadingView?.snp.makeConstraints({ make in
             make.edges.equalToSuperview()

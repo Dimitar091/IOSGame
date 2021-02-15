@@ -39,19 +39,64 @@ class LoadingView: UIView {
         return imageView
     }()
     
+    private lazy var btnClose: UIButton = {
+        let button = UIButton()
+        button.setTitle("X", for: .normal)
+//        let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .medium)
+//        button.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
+        button.addTarget(self, action: #selector(onClose), for: .touchUpInside)
+        button.tintColor = .black
+        button.isHidden = true
+        return button
+    }()
+    
     private var me: User
     private var opponent: User
+    private var closeTimer: Timer?
+    private var gameRequest: GameRequest?
+    private var cancelGameTimer: Timer?
+    private var elapsedSeaconds = 0
     
-    init(me: User, opponent: User) {
+    init(me: User, opponent: User, requset: GameRequest?) {
         self.me = me
         self.opponent = opponent
+        gameRequest = requset
         super.init(frame: .zero)
         backgroundColor = UIColor(hex: "#3545C8")
         setupViews()
         setupData()
     }
+    
+    override func willMove(toSuperview newSuperview: UIView?) {
+        super.willMove(toSuperview: newSuperview)
+        // when superview is not nil then its adaSubview method
+        if newSuperview != nil {
+            setupTimers()
+        }
+        //when superview is nil then its removeFromSuperview
+        
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    private func setupTimers() {
+        closeTimer = Timer.scheduledTimer(timeInterval: CancelGameSeaconds, target: self, selector: #selector(enableCancelGame), userInfo: nil, repeats: false)
+        cancelGameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerTick), userInfo: nil, repeats: true)
+    }
+    
+    @objc func enableCancelGame() {
+        btnClose.isHidden = false
+        closeTimer?.invalidate()
+        closeTimer = nil
+    }
+    
+    @objc func timerTick() {
+        elapsedSeaconds += 1 // elapsedSeaconds = elapsedSeaconds + 1
+        if elapsedSeaconds == WaitingGameSeaconds {
+            cancelGameTimer = nil
+            onClose()
+        }
     }
     
     private func setupViews() {
@@ -60,6 +105,12 @@ class LoadingView: UIView {
         addSubview(lblVs)
         addSubview(avatarOpponent)
         addSubview(lblRequestStatus)
+        addSubview(btnClose)
+        
+        btnClose.snp.makeConstraints { make in
+            make.leading.top.equalToSuperview().inset(20)
+            make.size.equalTo(50)
+        }
         
         gradientView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -97,4 +148,11 @@ class LoadingView: UIView {
         lblRequestStatus.text = "Waiting opponent"
     }
     
+    @objc private func onClose() {
+        guard let request = gameRequest else { return }
+        cancelGameTimer?.invalidate()
+        cancelGameTimer = nil
+        DataStore.shared.deleteGameRequest(gameRequest: request)
+        removeFromSuperview()
+    }
 }

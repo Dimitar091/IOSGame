@@ -21,6 +21,7 @@
 		433769A825D452A1008B5F01 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433769A725D452A1008B5F01 /* LoadingView.swift */; };
 		433769AC25D454BF008B5F01 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433769AB25D454BF008B5F01 /* AvatarView.swift */; };
 		433769AF25D45F4C008B5F01 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433769AE25D45F4C008B5F01 /* UIColor.swift */; };
+		435B2C8D25D80FA300D8209F /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435B2C8C25D80FA300D8209F /* Helpers.swift */; };
 		43660F26F7538C8B37524E8A /* Pods_IOSApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF383F8E84C5201F47A8F23 /* Pods_IOSApp.framework */; };
 		436A3FB325CB1615002B1550 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 436A3FB225CB1615002B1550 /* SnapKit */; };
 		436A3FB725CB1C6B002B1550 /* UITableViewCell+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436A3FB625CB1C6B002B1550 /* UITableViewCell+Extensions.swift */; };
@@ -46,6 +47,7 @@
 		433769A725D452A1008B5F01 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		433769AB25D454BF008B5F01 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		433769AE25D45F4C008B5F01 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
+		435B2C8C25D80FA300D8209F /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		436A3FB625CB1C6B002B1550 /* UITableViewCell+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableViewCell+Extensions.swift"; sourceTree = "<group>"; };
 		436A3FBB25CB21B5002B1550 /* GameRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRequest.swift; sourceTree = "<group>"; };
 		436A3FBF25CB2253002B1550 /* DataStore+GameRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DataStore+GameRequest.swift"; sourceTree = "<group>"; };
@@ -148,6 +150,7 @@
 				436A3FB625CB1C6B002B1550 /* UITableViewCell+Extensions.swift */,
 				436A3FC225CB2402002B1550 /* Date+Extension.swift */,
 				433769AE25D45F4C008B5F01 /* UIColor.swift */,
+				435B2C8C25D80FA300D8209F /* Helpers.swift */,
 			);
 			path = extensions;
 			sourceTree = "<group>";
@@ -303,6 +306,7 @@
 				430C95C725C86D4800505CC8 /* SceneDelegate.swift in Sources */,
 				430C95FA25C875BA00505CC8 /* HomeViewController.swift in Sources */,
 				436A3FB725CB1C6B002B1550 /* UITableViewCell+Extensions.swift in Sources */,
+				435B2C8D25D80FA300D8209F /* Helpers.swift in Sources */,
 				43219A2725C8782D003669BD /* UserCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -380,7 +384,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -435,7 +439,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -452,7 +456,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3WDU2TA577;
 				INFOPLIST_FILE = IOSApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -471,7 +477,9 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3WDU2TA577;
 				INFOPLIST_FILE = IOSApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

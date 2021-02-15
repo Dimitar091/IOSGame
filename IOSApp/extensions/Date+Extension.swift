@@ -14,6 +14,7 @@ extension Date {
     func toMiliseconds() -> TimeInterval {
         return (self.timeIntervalSince1970 * 1000.0)
     }
+    @available(iOS 13.0, *)
     func timeAgoDisplay() -> String {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .full

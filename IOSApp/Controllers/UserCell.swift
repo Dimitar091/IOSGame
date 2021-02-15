@@ -15,7 +15,7 @@ protocol UserCellDelegate: class {
 class UserCell: UITableViewCell {
     
     private lazy var activityIndicator: UIActivityIndicatorView =  {
-        let activityIndicator = UIActivityIndicatorView(style: .medium)
+        let activityIndicator = UIActivityIndicatorView(style: .white)
         activityIndicator.color = .red
         return activityIndicator
     }()
@@ -74,6 +74,7 @@ class UserCell: UITableViewCell {
         }
         
     }
+    
     
     
     @objc private func onStart() {
