@@ -15,6 +15,7 @@ class DataStore {
     enum FirebaseCollections: String {
         case users
         case gameRequests
+        case games
     }
         
     static let shared = DataStore()
@@ -39,6 +40,7 @@ class DataStore {
     
     var gameRequestListener: ListenerRegistration?
     var gameRequestDelitionListener: ListenerRegistration?
+    var gameListener: ListenerRegistration?
     
     
     init() {}

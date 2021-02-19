@@ -45,6 +45,7 @@ class LoadingView: UIView {
 //        let config = UIImage.SymbolConfiguration(pointSize: 50, weight: .medium)
 //        button.setImage(UIImage(systemName: "xmark", withConfiguration: config), for: .normal)
         button.addTarget(self, action: #selector(onClose), for: .touchUpInside)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 20)
         button.tintColor = .black
         button.isHidden = true
         return button
@@ -56,6 +57,8 @@ class LoadingView: UIView {
     private var gameRequest: GameRequest?
     private var cancelGameTimer: Timer?
     private var elapsedSeaconds = 0
+    
+    var gameAccepted: ((_ game: Game) -> Void)?
     
     init(me: User, opponent: User, requset: GameRequest?) {
         self.me = me
@@ -72,6 +75,7 @@ class LoadingView: UIView {
         // when superview is not nil then its adaSubview method
         if newSuperview != nil {
             setupTimers()
+            setGameListener()
         }
         //when superview is nil then its removeFromSuperview
         
@@ -83,6 +87,14 @@ class LoadingView: UIView {
     private func setupTimers() {
         closeTimer = Timer.scheduledTimer(timeInterval: CancelGameSeaconds, target: self, selector: #selector(enableCancelGame), userInfo: nil, repeats: false)
         cancelGameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerTick), userInfo: nil, repeats: true)
+    }
+    
+    private func setGameListener() {
+        DataStore.shared.setGameListener { [weak self] (game, _) in
+            guard let game = game else { return }
+            self?.gameAccepted?(game)
+            self?.removeFromSuperview()
+        }
     }
     
     @objc func enableCancelGame() {

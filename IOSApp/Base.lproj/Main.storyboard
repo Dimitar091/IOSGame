@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ULN-6h-d0j">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -70,11 +71,40 @@
                     <navigationItem key="navigationItem" id="7u8-9k-Pdi"/>
                     <connections>
                         <outlet property="tableView" destination="R6p-QC-knX" id="ogK-1p-lef"/>
+                        <segue destination="cIQ-4c-U6h" kind="show" identifier="gameSegue" id="5HU-ab-tv4"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="voV-AF-Kev" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1128.985507246377" y="93.75"/>
+        </scene>
+        <!--Game View Controller-->
+        <scene sceneID="yE5-vk-wn7">
+            <objects>
+                <viewController id="cIQ-4c-U6h" customClass="GameViewController" customModule="IOSApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="qeV-aD-IAp">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fdF-2y-ZJq">
+                                <rect key="frame" x="20" y="95" width="41.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="siE-Kf-Zn6"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="fdF-2y-ZJq" firstAttribute="leading" secondItem="siE-Kf-Zn6" secondAttribute="leading" constant="20" id="M3t-4J-l2u"/>
+                            <constraint firstItem="fdF-2y-ZJq" firstAttribute="top" secondItem="siE-Kf-Zn6" secondAttribute="top" constant="51" id="cPm-7Q-Rtr"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="rdZ-Ah-shP"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="21L-hG-wpn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1986.9565217391305" y="93.75"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="BQl-Na-Wpx">
