@@ -10,8 +10,10 @@ import Foundation
 extension DataStore {
     func createGame(players: [User], completion: @escaping (_ game: Game?,_ error: Error?) -> Void) {
         
+        var moves = [String:Moves]()
+        players.forEach( { moves[$0.id!] = .idle })
         let gamesRef = database.collection(FirebaseCollections.games.rawValue).document()
-        let game = Game(id: gamesRef.documentID, players: players)
+        let game = Game(id: gamesRef.documentID, players: players, moves: moves)
         do {
             try gamesRef.setData(from: game, completion: { error in
                 if let error = error {
@@ -99,5 +101,10 @@ extension DataStore {
         let gameRef = database.collection(FirebaseCollections.games.rawValue)
             .document(game.id)
         gameRef.updateData(["state": newState])
+    }
+    func updateGameMoves(game: Game) {
+        let gameRef = database.collection(FirebaseCollections.games.rawValue)
+            .document(game.id)
+        gameRef.updateData(["moves":game.moves])
     }
 }
