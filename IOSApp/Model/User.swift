@@ -7,7 +7,7 @@
 
 import Foundation
 
-let avatars = ["avatarOne","avatarTwo","avatarThree"]
+let avatars = ["avatarOne","avatarTwo","avatarThree","avatarFourth","avatarFifth","avatarSixth"]
 
 struct User: Codable {
     var id: String?

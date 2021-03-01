@@ -10,6 +10,11 @@ import UIKit
 class HomeViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var btnExpand: UIButton!
+    @IBOutlet weak var tableHolderView: UIView!
+    @IBOutlet weak var tableHolderBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var holderImageNameView: UIView!
+    
     
     var users = [User]()
     var loadingView: LoadingView?
@@ -21,6 +26,7 @@ class HomeViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didReciveGameRequest(_:)), name: Notification.Name("DidReviveGameRequestNotification"), object: nil)
         getUsers()
         setupTableView()
+        setupAvatarView()
     
     }
     override func viewWillAppear(_ animated: Bool) {
@@ -69,6 +75,7 @@ class HomeViewController: UIViewController {
             }
             if let user = user {
                 DataStore.shared.createGame(players: [localUser,user]) { (game, error) in
+                    DataStore.shared.deleteGameRequest(gameRequest: gameRequest)
                     if let error = error {
                         print(error.localizedDescription)
                         return
@@ -81,9 +88,16 @@ class HomeViewController: UIViewController {
         }
     }
     
-    private func enterGame(_ game: Game) {
+    private func enterGame(_ game: Game,_ shouldUpdateGame: Bool = false) {
         DataStore.shared.removeGameListener()
-        performSegue(withIdentifier: "gameSegue", sender: game)
+        if shouldUpdateGame {
+            var newGame = game
+            newGame.state = .inprogress
+            DataStore.shared.updateGameStatus(game: newGame, newState: Game.GameState.inprogress.rawValue)
+            performSegue(withIdentifier: "gameSegue", sender: newGame)
+        } else {
+            performSegue(withIdentifier: "gameSegue", sender: game)
+        }
     }
     
     private func requestPushNotifications() {
@@ -91,8 +105,18 @@ class HomeViewController: UIViewController {
         appDelegate.requestNotificationsPermission()
     }
     
+    func setupAvatarView() {
+        let avatarView = AvatarView(state: .imageAndName)
+        holderImageNameView.addSubview(avatarView)
+        avatarView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(5)
+        }
+        avatarView.username = DataStore.shared.localUser?.username
+        avatarView.image = DataStore.shared.localUser?.avatarImage
+    }
+    
     func setupTableView() {
-        tableView.separatorStyle = .singleLine
+        tableView.separatorStyle = .none
         tableView.dataSource = self
         tableView.register(UserCell.self, forCellReuseIdentifier: UserCell.reuseIdentifier)
     }
@@ -106,6 +130,35 @@ class HomeViewController: UIViewController {
             }
         }
     }
+    @IBAction func btnExpand(_ sender: Any) {
+        
+        let isExpanded = tableHolderBottomConstraint.constant == 0
+        
+        self.btnExpand.setImage(UIImage(named: isExpanded ? "up" : "dropdown"), for: .normal)
+        
+        tableHolderBottomConstraint.constant = isExpanded ?  tableHolderView.frame.height : 0
+        
+        UIView.animate(withDuration: 0.3, delay: 0.0, options: [.curveEaseInOut]) {
+            self.view.layoutIfNeeded()
+            //Animating frames instead of constraints
+           //self.tableHolderView.frame.origin =
+            //CGPoint(x: self.tableHolderView.frame.origin.x, y:-self.tableHolderView.frame.size.height)
+            
+        } completion: { completed in
+            if completed {
+                //animation is completed
+                
+            }
+        }
+
+    }
+    func showErrorAlert(username: String) {
+        let alert = UIAlertController(title: "", message: "\(username) already in game", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+        alert.addAction(okAction)
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 //MARK: - Navigation
 extension HomeViewController {
@@ -124,6 +177,8 @@ extension HomeViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: UserCell.reuseIdentifier ) as! UserCell
         let user = users[indexPath.row]
+        cell.layer.cornerRadius = 16
+        cell.clipsToBounds = true
         cell.setData(user: user)
         cell.delegate = self
         return cell
@@ -136,22 +191,36 @@ extension HomeViewController: UserCellDelegate {
               let localUser = DataStore.shared.localUser,
               let localUserId = DataStore.shared.localUser?.id else { return }
         
-        DataStore.shared.checkForExistingGame(toUser: userId, fromUser: localUserId) { (exists, error) in
+        DataStore.shared.checkForExistingGameRequset(toUser: userId, fromUser: localUserId) { (exists, error) in
             if let error = error {
                 print(error.localizedDescription)
                 print("Error checking for game, try again later")
                 return
             }
             if !exists {
-                DataStore.shared.startGameRequest(userId: userId) { [weak self] (request, error) in
-                    if request != nil {
-                        self?.setupLoadingView(me: localUser, opponent: user, requset: request)
-                        DataStore.shared.setGameRequestDelitionListener()
-                 }
-              }
+                self.checkForOngoaingGame(userId: userId, localUser: localUser, opponent: user)
            }
         }
     }
+    func checkForOngoaingGame(userId: String, localUser: User, opponent: User) {
+        let username = opponent.username
+        DataStore.shared.checkForOnGoiaingGameWith(userId: userId) { [weak self] (userInGame, error) in
+            if !userInGame {
+                self?.sendGameRequestTo(userId: userId, localUser: localUser, opponent: opponent)
+            }else {
+                self?.showErrorAlert(username: "\(username ?? "already in game")" )
+            }
+        }
+    }
+    
+    func sendGameRequestTo(userId: String, localUser: User, opponent: User) {
+        DataStore.shared.startGameRequest(userId: userId) { [weak self] (request, error) in
+            if request != nil {
+                self?.setupLoadingView(me: localUser, opponent: opponent, requset: request)
+                DataStore.shared.setGameRequestDelitionListener()
+            }
+    }
+  }
 }
 // MARK: LoadingViewHandling
 extension HomeViewController {
@@ -164,7 +233,7 @@ extension HomeViewController {
         loadingView = LoadingView(me: me, opponent: opponent, requset: requset)
         
         loadingView?.gameAccepted = { [weak self] game in
-            self?.enterGame(game)
+            self?.enterGame(game, true)
             
         }
         
@@ -180,3 +249,4 @@ extension HomeViewController {
     }
     
 }
+

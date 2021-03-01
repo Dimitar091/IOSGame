@@ -9,6 +9,7 @@ import Foundation
 import FirebaseAuth
 import FirebaseFirestoreSwift
 import FirebaseFirestore
+import FirebaseMessaging
 
 class DataStore {
     
@@ -24,20 +25,23 @@ class DataStore {
     
     var localUser: User? {
         didSet {
-            if localUser?.avatarImage == nil {
+//            if localUser?.avatarImage == nil {
                 // one solution 
                //localUser?.avatarImage = avatars.randomElement()
                 localUser?.setRandomImage()
+                if localUser?.deviceToken == nil {
+                setPushToken()
+                }
                 guard let localUser = localUser else { return }
                 DataStore.shared.save(user: localUser) { (_, _) in
                 }
-            }
+//            }
         }
     }
         
     
     var usersListener: ListenerRegistration?
-    
+    var gameStatusListener: ListenerRegistration?
     var gameRequestListener: ListenerRegistration?
     var gameRequestDelitionListener: ListenerRegistration?
     var gameListener: ListenerRegistration?
@@ -45,18 +49,40 @@ class DataStore {
     
     init() {}
     
-    func continueWithGuest(completion: @escaping (_ user: User?, _ error: Error?) -> Void) {
+    func setPushToken() {
+        Messaging.messaging().token { token, error in
+          if let error = error {
+            print("Error fetching FCM registration token: \(error)")
+          } else if let token = token {
+            print("FCM registration token: \(token)")
+            self.localUser?.deviceToken = token
+            self.save(user: self.localUser!) { (_, _) in
+                
+            }
+          }
+        }
+    }
+    
+    func checkForExistingUsername(_ username: String,_ comletion: @escaping(_ exists: Bool,_ error: Error?) -> Void) {
+        let usernameRef = self.database.collection(FirebaseCollections.users.rawValue).whereField("username", isEqualTo: username)
+        
+        usernameRef.getDocuments { (snapshot, error) in
+            if let snapshot = snapshot, snapshot.documents.count == 0 {
+                comletion(false, nil)
+                return
+            }
+            comletion(true, error)
+        }
+    }
+    
+    func continueWithGuest(username: String,completion: @escaping (_ user: User?, _ error: Error?) -> Void) {
         Auth.auth().signInAnonymously { (result, error) in
             if let error = error {
                 completion(nil, error)
                 return
             }
             if let currentUser = result?.user {
-//                var avatar = "avatarOne"
-//                if let randomAvatar = ["avatarOne","avatarTwo","avatarThree"].randomElement() {
-//                    avatar = randomAvatar
-//                }                                                                       //avatar
-                let localUser = User.createUser(id: currentUser.uid, username: "Error")
+                let localUser = User.createUser(id: currentUser.uid, username: username)
                     self.save(user: localUser, completion: completion)
             }
         }

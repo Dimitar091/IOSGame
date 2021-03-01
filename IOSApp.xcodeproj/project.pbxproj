@@ -21,6 +21,7 @@
 		433769A825D452A1008B5F01 /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433769A725D452A1008B5F01 /* LoadingView.swift */; };
 		433769AC25D454BF008B5F01 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433769AB25D454BF008B5F01 /* AvatarView.swift */; };
 		433769AF25D45F4C008B5F01 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433769AE25D45F4C008B5F01 /* UIColor.swift */; };
+		433F12FE25E436BB005A8DDF /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433F12FD25E436BB005A8DDF /* SplashViewController.swift */; };
 		435B2C8D25D80FA300D8209F /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435B2C8C25D80FA300D8209F /* Helpers.swift */; };
 		43660F26F7538C8B37524E8A /* Pods_IOSApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF383F8E84C5201F47A8F23 /* Pods_IOSApp.framework */; };
 		436A3FB325CB1615002B1550 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 436A3FB225CB1615002B1550 /* SnapKit */; };
@@ -50,6 +51,7 @@
 		433769A725D452A1008B5F01 /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
 		433769AB25D454BF008B5F01 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		433769AE25D45F4C008B5F01 /* UIColor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
+		433F12FD25E436BB005A8DDF /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		435B2C8C25D80FA300D8209F /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		436A3FB625CB1C6B002B1550 /* UITableViewCell+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableViewCell+Extensions.swift"; sourceTree = "<group>"; };
 		436A3FBB25CB21B5002B1550 /* GameRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRequest.swift; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 				430C95F525C8703000505CC8 /* DataStore */,
 				433769A625D4526F008B5F01 /* Views */,
 				430C95F825C8759400505CC8 /* Controllers */,
+				433804A425E1491D00BF02FA /* TableViewCells */,
 				430C95CA25C86D4800505CC8 /* Main.storyboard */,
 				430C95C425C86D4800505CC8 /* AppDelegate.swift */,
 				430C95C625C86D4800505CC8 /* SceneDelegate.swift */,
@@ -140,7 +143,7 @@
 				430C95C825C86D4800505CC8 /* WelcomeViewController.swift */,
 				430C95F925C875BA00505CC8 /* HomeViewController.swift */,
 				43CF734925DD993200007376 /* GameViewController.swift */,
-				43219A2625C8782D003669BD /* UserCell.swift */,
+				433F12FD25E436BB005A8DDF /* SplashViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -152,6 +155,14 @@
 				433769AB25D454BF008B5F01 /* AvatarView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		433804A425E1491D00BF02FA /* TableViewCells */ = {
+			isa = PBXGroup;
+			children = (
+				43219A2625C8782D003669BD /* UserCell.swift */,
+			);
+			path = TableViewCells;
 			sourceTree = "<group>";
 		};
 		436A3FB525CB1C42002B1550 /* extensions */ = {
@@ -318,6 +329,7 @@
 				430C95C725C86D4800505CC8 /* SceneDelegate.swift in Sources */,
 				430C95FA25C875BA00505CC8 /* HomeViewController.swift in Sources */,
 				436A3FB725CB1C6B002B1550 /* UITableViewCell+Extensions.swift in Sources */,
+				433F12FE25E436BB005A8DDF /* SplashViewController.swift in Sources */,
 				43CF734725DD917900007376 /* DataStore+Game.swift in Sources */,
 				435B2C8D25D80FA300D8209F /* Helpers.swift in Sources */,
 				43219A2725C8782D003669BD /* UserCell.swift in Sources */,

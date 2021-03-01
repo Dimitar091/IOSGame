@@ -89,10 +89,19 @@ class LoadingView: UIView {
         cancelGameTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(timerTick), userInfo: nil, repeats: true)
     }
     
+    private func removeTimers() {
+        closeTimer?.invalidate()
+        closeTimer = nil
+        
+        cancelGameTimer?.invalidate()
+        cancelGameTimer = nil
+    }
+    
     private func setGameListener() {
         DataStore.shared.setGameListener { [weak self] (game, _) in
             guard let game = game else { return }
             self?.gameAccepted?(game)
+            self?.removeTimers()
             self?.removeFromSuperview()
         }
     }
@@ -130,6 +139,7 @@ class LoadingView: UIView {
         
         avatarMe.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(50)
+            
             make.width.equalTo(130)
             make.height.equalTo(200)
             make.centerX.equalToSuperview()

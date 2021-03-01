@@ -10,13 +10,23 @@ import SnapKit
 
 enum AvatarUIState {
     case loading
+    case imageAndName
 }
 
 class AvatarView: UIView {
     
     var username: String? {
         didSet {
+            if state == .imageAndName {
+                lblUsername.textColor = UIColor(hex: "4A6495")
+                lblUsername.textAlignment = .left
+
+            } else {
+                lblUsername.textColor = .white
+                lblUsername.textAlignment = .center
+            }
             lblUsername.text = username
+            lblUsername.textAlignment = .center
         }
     }
     
@@ -55,6 +65,15 @@ class AvatarView: UIView {
         return stackView
     }()
     
+    private lazy var horizontalStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .fill
+        stackView.distribution = .fill
+        stackView.spacing = 5
+        return stackView
+    }()
+    
     var state: AvatarUIState
     init(state: AvatarUIState) {
         self.state = state
@@ -73,6 +92,10 @@ class AvatarView: UIView {
             stackView.addArrangedSubview(lblUsername)
             stackView.addArrangedSubview(avatarImage)
             stackView.addArrangedSubview(lblWinsLoses)
+        case .imageAndName:
+            addSubview(horizontalStackView)
+            horizontalStackView.addArrangedSubview(avatarImage)
+            horizontalStackView.addArrangedSubview(lblUsername)
         }
         setupConstraints()
     }
@@ -87,6 +110,14 @@ class AvatarView: UIView {
             avatarImage.snp.makeConstraints { (make) in
                 make.width.equalTo(85)
                 make.height.equalTo(100)
+            }
+        case .imageAndName:
+            horizontalStackView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+            avatarImage.snp.makeConstraints { make in
+                make.width.equalTo(45)
+                make.height.equalTo(40)
             }
         }
     }
