@@ -7,7 +7,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController {
+class HomeViewController: UIViewController, AlertPresenter{
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var btnExpand: UIButton!
@@ -21,9 +21,23 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        #if targetEnvironment(simulator)
+        DataStore.shared.setGameRequestListener()
+        #else
         requestPushNotifications()
+        #endif
+
         title = "Welcome " + (DataStore.shared.localUser?.username ?? "")
         NotificationCenter.default.addObserver(self, selector: #selector(didReciveGameRequest(_:)), name: Notification.Name("DidReviveGameRequestNotification"), object: nil)
+        
+        NotificationCenter.default.addObserver(forName: Notification.Name("AcceptGameRequest"),
+                                               object: nil,
+                                               queue: nil) { [weak self] notification in
+            guard let userInfo = notification.userInfo as? [String:Any],
+            let gameRequest = userInfo["GameRequest"] as? GameRequest else { return }
+            self?.acceptGameRequest(gameRequest)
+        }
+        
         getUsers()
         setupTableView()
         setupAvatarView()
@@ -35,7 +49,17 @@ class HomeViewController: UIViewController {
             guard let self = self else {return}
             self.getUsers()
         }
-        DataStore.shared.setGameRequestListener()
+        if let request = PushNotificationsManager.shared.getGameRequest() {
+            showGameRequestAlert(request)
+            PushNotificationsManager.shared.clearVariables()
+        }
+        
+        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        appDelegate?.checkForEnabledPushNotifications(completion: { enabled in
+            if !enabled {
+                DataStore.shared.setGameRequestListener()
+            }
+        })
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -43,10 +67,7 @@ class HomeViewController: UIViewController {
         DataStore.shared.removeGameRequestListener()
     }
     
-    @objc private func didReciveGameRequest(_ notification: Notification) {
-        guard let userInfo = notification.userInfo as? [String:GameRequest] else { return }
-        guard let gameRequest = userInfo["GameRequest"] else { return }
-        
+    private func showGameRequestAlert(_ gameRequest: GameRequest) {
         let fromUsername = gameRequest.fromUsername ?? ""
         let alert = UIAlertController(title: "Game Request",
                                       message: "\(fromUsername) invited you for a game" ,
@@ -60,6 +81,12 @@ class HomeViewController: UIViewController {
         alert.addAction(accept)
         alert.addAction(decline)
         present(alert, animated: true, completion: nil)
+    }
+    
+    @objc private func didReciveGameRequest(_ notification: Notification) {
+        guard let userInfo = notification.userInfo as? [String:GameRequest] else { return }
+        guard let gameRequest = userInfo["GameRequest"] else { return }
+        showGameRequestAlert(gameRequest)
     }
     
     private func declineRequest(gameRequest: GameRequest) {
@@ -131,7 +158,6 @@ class HomeViewController: UIViewController {
         }
     }
     @IBAction func btnExpand(_ sender: Any) {
-        
         let isExpanded = tableHolderBottomConstraint.constant == 0
         
         self.btnExpand.setImage(UIImage(named: isExpanded ? "up" : "dropdown"), for: .normal)
@@ -153,7 +179,7 @@ class HomeViewController: UIViewController {
 
     }
     func showErrorAlert(username: String) {
-        let alert = UIAlertController(title: "", message: "\(username) already in game", preferredStyle: .alert)
+        let alert = UIAlertController(title: nil, message: "\(username) already in game", preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
         alert.addAction(okAction)
         present(alert, animated: true, completion: nil)
@@ -165,8 +191,10 @@ extension HomeViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         guard segue.identifier == "gameSegue" else { return }
         
-        let gameController = segue.destination as! GameViewController
-        gameController.game = sender as? Game
+            let gameController = segue.destination as! GameViewController
+            gameController.game = sender as? Game
+            // Fallback on earlier versions
+        
     }
 }
 // MARK: - UITableViewDataSource
@@ -217,7 +245,6 @@ extension HomeViewController: UserCellDelegate {
         DataStore.shared.startGameRequest(userId: userId) { [weak self] (request, error) in
             if request != nil {
                 self?.setupLoadingView(me: localUser, opponent: opponent, requset: request)
-                DataStore.shared.setGameRequestDelitionListener()
             }
     }
   }
@@ -230,7 +257,7 @@ extension HomeViewController {
             loadingView?.removeFromSuperview()
             loadingView = nil
         }
-        loadingView = LoadingView(me: me, opponent: opponent, requset: requset)
+        loadingView = LoadingView(me: me, opponent: opponent, requset: requset, alertPresenter: self)
         
         loadingView?.gameAccepted = { [weak self] game in
             self?.enterGame(game, true)
@@ -247,6 +274,4 @@ extension HomeViewController {
         loadingView?.removeFromSuperview()
         loadingView = nil
     }
-    
 }
-

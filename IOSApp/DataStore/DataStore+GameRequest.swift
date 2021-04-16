@@ -27,12 +27,13 @@ extension DataStore {
     }
     
     private func createGameRequest(toUser: String, id: String) -> GameRequest? {
-        guard let localUserId = localUser?.id else { return nil }
+        guard let localUser = DataStore.shared.localUser,
+              let localUserId = localUser.id else { return nil }
         return GameRequest(id: id,
                            from: localUserId,
                            to: toUser,
                            createdAt: Date().toMiliseconds(),
-                           fromUsername: localUser?.username)
+                           fromUsername: localUser.username)
     }
     
     func checkForExistingGameRequset(toUser: String, fromUser: String, completion: @escaping (_ exists: Bool,_ error: Error?) -> Void) {
@@ -69,23 +70,20 @@ extension DataStore {
             }
         })
     }
+    
     func removeGameRequestListener() {
         gameRequestListener?.remove()
         gameRequestListener = nil
     }
     //Remove
-    func setGameRequestDelitionListener() {
+    func setGameRequestDelitionListener(completion: @escaping () -> Void) {
         if gameRequestDelitionListener != nil {
             removeGameRequestDelitionListener()
         }
         guard let localUserId = localUser?.id else { return }
-        gameRequestListener = database.collection(FirebaseCollections.gameRequests.rawValue).whereField("to", isEqualTo: localUserId).addSnapshotListener({ (snapshot, error) in
-            if let snapshot = snapshot {
-                do {
-                    print("Game Request count: \(snapshot.documents.count)")
-                } catch {
-                    print(error.localizedDescription)
-                }
+        gameRequestListener = database.collection(FirebaseCollections.gameRequests.rawValue).whereField("from", isEqualTo: localUserId).addSnapshotListener({ (snapshot, error) in
+            if snapshot?.documents.count == 0 {
+                completion()
             }
         })
     }
@@ -98,5 +96,26 @@ extension DataStore {
         let gameRequestRef = database.collection(FirebaseCollections.gameRequests.rawValue)
             .document(gameRequest.id)
         gameRequestRef.delete()
+    }
+    
+    func getGameRequestWith(id: String, completion: @escaping(_ gameRequest: GameRequest?,_ error: Error?) -> Void) {
+        
+        let gameRequestRef = database.collection(FirebaseCollections.gameRequests.rawValue)
+            .document(id)
+        gameRequestRef.getDocument { (document, error) in
+            if let error = error {
+                completion(nil, error)
+                return
+            }
+            if let document = document {
+                do {
+                    let gameRequest = try document.data(as: GameRequest.self)
+                    completion(gameRequest, nil)
+                } catch {
+                    print(error.localizedDescription)
+                    completion(nil, error)
+                }
+            }
+        }
     }
 }

@@ -9,22 +9,44 @@ import UIKit
 
 class GameViewController: UIViewController {
     
+    @IBOutlet weak var myHandHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var opponentHandHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var opponentTopHandConstraint: NSLayoutConstraint!
+    @IBOutlet weak var bottomHandConstraint: NSLayoutConstraint!
+    @IBOutlet weak var opponentHandImage: UIImageView!
     @IBOutlet weak var btnScissors: UIButton!
+    @IBOutlet weak var myHandImage: UIImageView!
     @IBOutlet weak var btnPaper: UIButton!
     @IBOutlet weak var btnRock: UIButton!
     @IBOutlet weak var btnRandom: UIButton!
     @IBOutlet weak var lblGameStatus: UILabel!
+    @IBOutlet weak var bloodImageView: UIImageView!
     
     var game: Game?
 
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        bloodImageView.transform = CGAffineTransform(scaleX: 0, y: 0)
         setGameStatusListener()
+        setConstraintsForSmalerDevices()
         lblGameStatus.text = game?.state.rawValue
             if let game = game {
                 shouldEnableButtons(enable: (game.state == .inprogress))
             }
+    }
+    
+    private func setConstraintsForSmalerDevices() {
+        // 420 Height for iphone X
+        
+        if DeviceType.isIphone8OrSmaller {
+            myHandHeightConstraint.constant = 320
+            opponentHandHeightConstraint.constant = 320
+        } else if DeviceType.isIphoneXOrBigger {
+            myHandHeightConstraint.constant = 420
+            opponentHandHeightConstraint.constant = 420
+        }
+        
     }
     
     private func setGameStatusListener() {
@@ -40,11 +62,14 @@ class GameViewController: UIViewController {
         shouldEnableButtons(enable: (updatedGame.state == .inprogress))
         lblGameStatus.text = updatedGame.state.rawValue
         game = updatedGame
-        checkForWinner(game: updatedGame)
-        if updatedGame.state  == Game.GameState.finished {
-            //dismis
-            showAlertForGameEnd(title: "Congratz", message: "You won")
-        }
+        animateMoves(game: updatedGame)
+//        checkForWinner(game: updatedGame)
+//        if updatedGame.state  == Game.GameState.finished && game?.winner == nil {
+//            DataStore.shared.removeGameListener()
+//            game?.winner = updatedGame.players.filter({ $0.id == DataStore.shared.localUser?.id }).first
+//            DataStore.shared.updateGameMoves(game: self.game!)
+//            continueToResults()
+//        }
     }
     
     private func shouldEnableButtons(enable: Bool) {
@@ -52,6 +77,89 @@ class GameViewController: UIViewController {
         btnPaper.isEnabled = enable
         btnScissors.isEnabled = enable
         btnRandom.isEnabled = enable
+    }
+    
+    private func animateMoves(game: Game) {
+        guard let localUserId = DataStore.shared.localUser?.id,
+              let opponentUser = game.players.filter( { $0.id != localUserId } ).first,
+              let opponentUserId = opponentUser.id else { return }
+        let moves = game.moves
+        let myMove = moves[localUserId]
+        let otherMove = moves[opponentUserId]
+        
+        if myMove != .idle && otherMove != .idle {
+            animateHandTo(move: myMove, isMyHand: true)
+            animateHandTo(move: otherMove, isMyHand: false)
+            //we will animate both hands at the same time back on board
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                self.opponentTopHandConstraint.constant = Moves.mimimumY(isOpponent: true)
+                self.bottomHandConstraint.constant = Moves.mimimumY(isOpponent: false)
+                UIView.animate(withDuration: 0.3) {
+                    self.view.layoutIfNeeded()
+                } completion: { finished in
+                    //Homework
+                    if finished {
+                        self.checkForWinner(game: game)
+                    }
+                }
+            }
+            return
+        }
+    }
+    
+    private func setWinner(game: Game) {
+        guard let localUserId = DataStore.shared.localUser?.id else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            DataStore.shared.removeGameListener()
+            self.game?.winner = game.players.filter({ $0.id == localUserId }).first
+            self.game?.state = .finished
+            DataStore.shared.updateGameMoves(game: self.game!)
+            self.continueToResults()
+        }
+    }
+    
+    private func animateHandTo(move: Moves?, isMyHand: Bool) {
+        guard let move = move, move != .idle else { return }
+
+        if isMyHand {
+            bottomHandConstraint.constant = Moves.maximumY
+        } else {
+            opponentTopHandConstraint.constant = Moves.maximumY
+        }
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
+        } completion: { finished in
+            if finished {
+                if isMyHand {
+                    self.myHandImage.image = UIImage(named: move.imageName(isOpponent: !isMyHand))
+                } else {
+                    self.opponentHandImage.image = UIImage(named: move.imageName(isOpponent: true))
+                }
+            }
+        }
+    }
+    private func animateFinalMove(game: Game ,space: CGFloat, animatingImageView: UIImageView) {
+        UIView.animate(withDuration: 0.5) {
+            animatingImageView.transform = CGAffineTransform(translationX: 0, y: space)
+        } completion: { finished in
+            if finished {
+                UIView.animate(withDuration: 0.5) {
+                    self.bloodImageView.transform = .identity
+                    self.myHandImage.transform = .identity
+                } completion: { finished in
+                    if finished {
+                        self.setWinner(game: game)
+                        if animatingImageView == self.myHandImage {
+                            self.setWinner(game: game)
+                        } else {
+                            if self.game?.winner != nil {
+                                self.continueToResults()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     private func checkForWinner(game: Game) {
@@ -71,17 +179,32 @@ class GameViewController: UIViewController {
         } else {
             // we have both picks
             if let mMove = myMove, let oMove = otherMove {
+                if mMove == oMove {
+                    self.game?.state = .finished
+                    DataStore.shared.updateGameMoves(game: self.game!)
+                    self.continueToResults()
+                    return
+                }
+                let space = abs((opponentHandImage.frame.origin.y + opponentHandImage.frame.height) - myHandImage.frame.origin.y)
                 if mMove > oMove {
                     //winner is mMove
+                    animateFinalMove(game: game, space: -space, animatingImageView: myHandImage)
+                } else if oMove > mMove {
+                    animateFinalMove(game: game, space: space, animatingImageView: opponentHandImage)
                 } else {
-                    //winner is oMove
+                    //draw
                 }
             }
         }
-        
     }
     
-    
+    func continueToResults() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let controller = storyboard.instantiateViewController(withIdentifier: "WinViewController") as! WinViewController
+        controller.game = game
+        controller.modalPresentationStyle = .fullScreen
+        present(controller, animated: true, completion: nil)
+    }
     
     
     
@@ -121,42 +244,50 @@ class GameViewController: UIViewController {
             present(alert, animated: true, completion: nil)
         }
     
-    @IBAction func onRandom(_ sender: Any) {
-        guard let localUserId = DataStore.shared.localUser?.id, var game = game else {
-            return
-        }
+    @IBAction func onRandom(_ sender: UIButton) {
         let choises: [Moves] = Moves.allCases.filter( { $0 != .idle } )
        // let choises: [Moves] = [.paper,.rock,.scissors]
-        let move = choises.randomElement()
-        game.moves[localUserId] = move
-        DataStore.shared.updateGameMoves(game: game)
+        if let move = choises.randomElement() {
+            gameChoices(choice: move)
+            selectButtonForMove(move: move)
+        }
         
         //More swifty way
 //      game.moves[localUserId] = Moves.allCases.filter { $0 != .idle }.randomElements()
 
-        
     }
-    @IBAction func onRock(_ sender: Any) {
-        guard let localUserId = DataStore.shared.localUser?.id, var game = game else {
-            return
-        }
-        game.moves[localUserId] = .rock
-        DataStore.shared.updateGameMoves(game: game)
+    @IBAction func onRock(_ sender: UIButton) {
+        sender.isSelected = true
+        gameChoices(choice: .rock)
     }
     
-    @IBAction func onPaper(_ sender: Any) {
-        guard let localUserId = DataStore.shared.localUser?.id, var game = game else {
-            return
-        }
-        game.moves[localUserId] = .paper
-        DataStore.shared.updateGameMoves(game: game)
+    @IBAction func onPaper(_ sender: UIButton) {
+        sender.isSelected = true
+        gameChoices(choice: .paper)
     }
     
-    @IBAction func onScissors(_ sender: Any) {
+    @IBAction func onScissors(_ sender: UIButton) {
+        sender.isSelected = true
+        gameChoices(choice: .scissors)
+    }
+    func gameChoices(choice: Moves) {
         guard let localUserId = DataStore.shared.localUser?.id, var game = game else {
             return
         }
-        game.moves[localUserId] = .scissors
+        game.moves[localUserId] = choice
         DataStore.shared.updateGameMoves(game: game)
+        shouldEnableButtons(enable: false)
+    }
+    private func selectButtonForMove(move: Moves) {
+        switch move {
+        case .idle:
+            return
+        case .paper:
+            btnPaper.isSelected = true
+        case .rock:
+            btnRock.isSelected = true
+        case .scissors:
+            btnScissors.isSelected = true
+        }
     }
 }

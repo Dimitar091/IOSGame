@@ -12,6 +12,6 @@ struct GameRequest: Codable {
     var id: String
     var from: String
     var to: String
-    var createdAt: TimeInterval
+    var createdAt: TimeInterval?
     var fromUsername: String?
 }

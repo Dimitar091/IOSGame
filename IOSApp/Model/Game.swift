@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 
 enum Moves: String, Comparable, Codable, CaseIterable {
@@ -46,6 +47,27 @@ enum Moves: String, Comparable, Codable, CaseIterable {
             return false
         }
      }
+    //Top most Y coordinate for Both's hand (hidden)
+    static var maximumY: CGFloat {
+        return -500
+    }
+    //Bottom most Y coordinate for both hand (fully shown)
+    static func mimimumY(isOpponent: Bool) -> CGFloat {
+        return isOpponent ? -90 : -30
+    }
+    
+    func imageName(isOpponent: Bool) -> String {
+        switch self {
+        case .idle:
+            return isOpponent ? "steady" : "steady_bottom"
+        case .scissors:
+            return isOpponent ? "scisorsTop" : "scisorsBot"
+        case .paper:
+            return isOpponent ? "paperTop" : "paperBot"
+        case .rock:
+            return isOpponent ? "rockTop" : "rockBot"
+        }
+    }
 }
 
 struct Game: Codable {

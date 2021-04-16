@@ -105,6 +105,10 @@ extension DataStore {
     func updateGameMoves(game: Game) {
         let gameRef = database.collection(FirebaseCollections.games.rawValue)
             .document(game.id)
-        gameRef.updateData(["moves":game.moves])
+        do {
+            try gameRef.setData(from: game, merge: true)
+        } catch  {
+            print(error.localizedDescription)
+        }
     }
 }

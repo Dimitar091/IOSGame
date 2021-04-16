@@ -99,7 +99,6 @@ class UserCell: UITableViewCell {
     @objc private func onStart() {
         guard let user = user else { return }
         delegate?.requestGameWith(user: user)
-        btnStart.isHidden = true
     }
     
     func setData(user: User) {

@@ -57,12 +57,14 @@ class LoadingView: UIView {
     private var gameRequest: GameRequest?
     private var cancelGameTimer: Timer?
     private var elapsedSeaconds = 0
+    private var alertPresenter: AlertPresenter?
     
     var gameAccepted: ((_ game: Game) -> Void)?
     
-    init(me: User, opponent: User, requset: GameRequest?) {
+    init(me: User, opponent: User, requset: GameRequest?, alertPresenter: AlertPresenter? = nil) {
         self.me = me
         self.opponent = opponent
+        self.alertPresenter = alertPresenter
         gameRequest = requset
         super.init(frame: .zero)
         backgroundColor = UIColor(hex: "#3545C8")
@@ -75,6 +77,7 @@ class LoadingView: UIView {
         // when superview is not nil then its adaSubview method
         if newSuperview != nil {
             setupTimers()
+            setGameRequestDeletionListener()
             setGameListener()
         }
         //when superview is nil then its removeFromSuperview
@@ -95,6 +98,15 @@ class LoadingView: UIView {
         
         cancelGameTimer?.invalidate()
         cancelGameTimer = nil
+    }
+    
+    private func setGameRequestDeletionListener() {
+        DataStore.shared.setGameRequestDelitionListener {
+            self.removeTimers()
+            self.removeFromSuperview()
+            self.alertPresenter?.showGameRequestDeclinedAlert()
+        }
+        
     }
     
     private func setGameListener() {
